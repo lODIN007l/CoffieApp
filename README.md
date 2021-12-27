@@ -4,7 +4,7 @@ A new Flutter project.
 Screenshot de la aplicacion 
 
 Progress Menu Home 
-![] (screenshot/screen1.png)
+![] (assets/1.png)
 
 
 App coffe with animations on images and text 
