@@ -1,7 +1,9 @@
 import 'package:coffie_app/models/coffe_model.dart';
+import 'package:coffie_app/views/coffe_detalles.dart';
 import 'package:flutter/material.dart';
 
 const _duracion = Duration(milliseconds: 200);
+const _paginaInicial = 8.0;
 
 class Page1 extends StatefulWidget {
   @override
@@ -10,11 +12,11 @@ class Page1 extends StatefulWidget {
 
 class _Page1State extends State<Page1> {
   final _pageControlCafe = PageController(
-    viewportFraction: 0.30,
-  );
-  final _paginaTextControlador = PageController();
-  double _paginaActual = 0.0;
-  double _textPagina = 0.0;
+      viewportFraction: 0.30, initialPage: _paginaInicial.toInt());
+  final _paginaTextControlador =
+      PageController(initialPage: _paginaInicial.toInt());
+  double _paginaActual = _paginaInicial;
+  double _textPagina = _paginaInicial;
   //escuchar los scroll
 
   void textScrollListener() {
@@ -50,6 +52,9 @@ class _Page1State extends State<Page1> {
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Colors.transparent,
+          leading: BackButton(
+            color: Colors.black,
+          ),
         ),
         body: Stack(
           children: [
@@ -79,23 +84,44 @@ class _Page1State extends State<Page1> {
                   if (index == 0) {
                     return const SizedBox.shrink();
                   }
-                  final caffe = cafe[index - 1];
+                  final caffe1 = cafe[index - 1];
                   final resultado = _paginaActual - index + 1;
 
                   final value = -0.4 * resultado + 1;
                   final opacidad = value.clamp(0.0, 1.0);
-                  return Transform(
-                      alignment: Alignment.bottomCenter,
-                      transform: Matrix4.identity()
-                        ..setEntry(3, 2, 0.001)
-                        ..translate(0.0, size.height / 2.6 * (1 - value).abs())
-                        ..scale(value),
-                      child: Opacity(
-                          opacity: opacidad,
-                          child: Image.asset(
-                            caffe.image,
-                            fit: BoxFit.fitHeight,
-                          )));
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(PageRouteBuilder(
+                          transitionDuration: const Duration(milliseconds: 650),
+                          pageBuilder: (context, animation, _) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: CafeDetalles(
+                                cafe: caffe1,
+                              ),
+                            );
+                          }));
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Transform(
+                          alignment: Alignment.bottomCenter,
+                          transform: Matrix4.identity()
+                            ..setEntry(3, 2, 0.001)
+                            ..translate(
+                                0.0, size.height / 2.6 * (1 - value).abs())
+                            ..scale(value),
+                          child: Opacity(
+                              opacity: opacidad,
+                              child: Hero(
+                                tag: caffe1.name,
+                                child: Image.asset(
+                                  caffe1.image,
+                                  fit: BoxFit.fitHeight,
+                                ),
+                              ))),
+                    ),
+                  );
                 },
                 itemCount: cafe.length,
                 controller: _pageControlCafe,
@@ -119,13 +145,18 @@ class _Page1State extends State<Page1> {
                                   .clamp(0.0, 1.0);
                               return Opacity(
                                   opacity: opacidad,
-                                  child: Text(
-                                    cafe[index].name,
-                                    maxLines: 2,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 35,
-                                        fontWeight: FontWeight.w700),
+                                  child: Hero(
+                                    tag: "text_${cafe[index].name}",
+                                    child: Material(
+                                      child: Text(
+                                        cafe[index].name,
+                                        maxLines: 2,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontSize: 35,
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                    ),
                                   ));
                             })),
 
